@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Який ви український вчитель?</title>
+<style>
+:root{
+  --bg:#fff9ef; --card:#ffffff; --ink:#252525; --muted:#6d6d6d;
+  --accent:#f2b84b; --accent2:#7aa7d9; --line:#eadfce; --good:#5c8d6c;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+  background:linear-gradient(135deg,#fff8e9,#eef6ff); color:var(--ink);
+  min-height:100vh;
+}
+.wrap{max-width:900px;margin:auto;padding:28px 18px 50px}
+.hero{text-align:center;padding:24px 10px 14px}
+.hero .badge{display:inline-block;background:#fff;border:1px solid var(--line);padding:7px 12px;border-radius:999px;font-weight:700}
+h1{font-size:clamp(32px,6vw,58px);line-height:1.02;margin:18px auto 12px;max-width:760px}
+.subtitle{font-size:18px;color:var(--muted);max-width:680px;margin:auto;line-height:1.5}
+.card{
+  background:rgba(255,255,255,.96); border:1px solid var(--line);
+  border-radius:24px; padding:clamp(20px,4vw,38px); margin-top:22px;
+  box-shadow:0 18px 50px rgba(55,45,25,.08);
+}
+.progress-label{display:flex;justify-content:space-between;gap:10px;font-size:14px;color:var(--muted);margin-bottom:8px}
+.progress{height:10px;background:#f0e9df;border-radius:99px;overflow:hidden;margin-bottom:26px}
+.bar{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:.35s}
+.day{font-size:14px;text-transform:uppercase;letter-spacing:.12em;font-weight:800;color:#997019}
+.question{font-size:clamp(22px,3.5vw,31px);line-height:1.25;margin:8px 0 12px}
+.story{font-size:17px;line-height:1.55;color:#454545;white-space:pre-line;margin-bottom:20px}
+.answers{display:grid;gap:12px}
+.answer{
+  width:100%;text-align:left;border:1px solid #e5dac8;background:#fffdf9;color:var(--ink);
+  border-radius:16px;padding:15px 17px;font-size:16px;line-height:1.35;cursor:pointer;
+  transition:.18s; font-family:inherit;
+}
+.answer:hover{transform:translateY(-2px);border-color:#d5a84e;background:#fff8e8}
+.answer:active{transform:translateY(0)}
+.letter{font-weight:900;margin-right:7px;color:#9a6b12}
+.hidden{display:none!important}
+.start{text-align:center}
+.bigbtn{
+  border:0;border-radius:16px;background:#222;color:#fff;padding:15px 24px;
+  font:700 17px inherit;cursor:pointer;margin-top:20px
+}
+.bigbtn:hover{opacity:.88}
+.result{text-align:center}
+.result img{
+  width:min(100%,420px);aspect-ratio:4/3;object-fit:cover;border-radius:22px;
+  border:1px solid var(--line);background:#f4f1eb;margin:10px auto 18px;display:block
+}
+.result h2{font-size:clamp(28px,5vw,46px);margin:8px 0}
+.result .desc{font-size:18px;line-height:1.55;max-width:680px;margin:0 auto}
+.motto{margin:22px auto 0;padding:15px 18px;border-radius:16px;background:#fff5d8;max-width:620px;font-size:19px;font-weight:800}
+.note{font-size:13px;color:#8a8177;margin-top:24px}
+.footer{text-align:center;color:#857b6d;font-size:13px;margin-top:20px}
+@media(max-width:560px){.wrap{padding:15px 12px 35px}.card{border-radius:19px}.answer{padding:14px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <div class="badge">До Дня вчителя 🍎</div>
+    <h1>Який ви український вчитель?</h1>
+    <p class="subtitle">Сім днів. Сім абсолютно звичайних педагогічних ситуацій: марсіани, цунамі, дистанційка, ШІ, динозавр і кінець світу. Перевіримо, що здатне вас здивувати.</p>
+  </header>
+
+  <section id="start" class="card start">
+    <h2>Готові прожити ще один робочий тиждень?</h2>
+    <p>Відповідайте так, як відповіли б насправді. Ну... або як хотілося б відповісти.</p>
+    <button class="bigbtn" onclick="startQuiz()">Почати понеділок</button>
+  </section>
+
+  <section id="quiz" class="card hidden">
+    <div class="progress-label"><span id="progressText">День 1 із 7</span><span>Тримайтеся 😄</span></div>
+    <div class="progress"><div id="bar" class="bar"></div></div>
+    <div id="day" class="day"></div>
+    <h2 id="question" class="question"></h2>
+    <div id="story" class="story"></div>
+    <div id="answers" class="answers"></div>
+  </section>
+
+  <section id="result" class="card result hidden">
+    <div class="day">Тиждень завершено. Ви вижили.</div>
+    <h2 id="resultTitle"></h2>
+    <img id="resultImage" src="" alt="Портрет типу вчителя">
+    <p id="resultDesc" class="desc"></p>
+    <div id="resultMotto" class="motto"></div>
+    <button class="bigbtn" onclick="restart()">Пройти ще раз</button>
+    <p class="note">Портрет можна замінити власним JPG-файлом із відповідною назвою.</p>
+  </section>
+
+  <div class="footer">Створено з любов’ю до людей, яких уже важко чимось здивувати.</div>
+</div>
+
+<script>
+const questions = [
+{
+ day:"Понеділок",
+ question:"Марсіани прибули встановити контакт із людством",
+ story:"Ви починаєте перший урок. За вікном приземляється космічний корабель. До класу заходять три марсіани й повідомляють: «Ми прибули встановити контакт із людством».",
+ answers:[
+  ["zen","Добре. Але спочатку запишіть тему уроку."],
+  ["plan","А довідка про зарахування до школи у вас є?"],
+  ["digital","Саджаю на останню парту й одразу додаю в Classroom."],
+  ["adventure","Нарешті! Робимо міжпланетний навчальний проєкт."]
+ ]
+},
+{
+ day:"Вівторок",
+ question:"У школі цунамі",
+ story:"Посеред третього уроку коридором іде двометрова хвиля. У вчительському чаті з’являється повідомлення: «Колеги, працюємо за планом».",
+ answers:[
+  ["survivor","Піднімаємо комп’ютери вище. Діти висохнуть."],
+  ["plan","Переношу урок на другий поверх. Тему не змінюю."],
+  ["adventure","Оголошую STEM-дослідження «Швидкість течії в коридорі»."],
+  ["zen","Пишу: «Уточніть, будь ласка, за яким саме планом»."]
+ ]
+},
+{
+ day:"Середа",
+ question:"Дистанційний урок",
+ story:"В одного учня немає світла, у другого інтернету, у третього камери, у четвертого в камері ходить кіт. П’ятий пише: «А мене чути?» І саме в цей момент зникаєте ви.\n\nЧерез 7 хвилин ви повертаєтесь у Zoom. Клас усе ще там.",
+ answers:[
+  ["zen","Так. На чому ми зупинилися?"],
+  ["survivor","Хто залишився живий, поставте + у чат."],
+  ["adventure","Чудово. Практичну частину з цифрової стійкості ми вже виконали."],
+  ["digital","Діти, дистанційний урок закінчується не тоді, коли зник інтернет. А коли здався вчитель."]
+ ]
+},
+{
+ day:"Четвер",
+ question:"ШІ захопив школу",
+ story:"Шкільний ШІ урочисто повідомляє: «Відтепер уроки проводитиму я».",
+ answers:[
+  ["survivor","Чудово. Ось 32 восьмикласники. Успіхів."],
+  ["adventure","Спочатку проведи батьківські збори. Подивимося, який ти розумний."],
+  ["digital","Добре. А електронний журнал ти вже заповнив?"],
+  ["zen","Йду пити каву. Через 20 хвилин він сам мене покличе."]
+ ]
+},
+{
+ day:"П’ятниця",
+ question:"У коридорі тиранозавр",
+ story:"На великій перерві коридором біжить тиранозавр. Діти вже знімають TikTok.",
+ answers:[
+  ["zen","Телефони прибрали!"],
+  ["plan","Хто привів динозавра без змінного взуття?"],
+  ["adventure","Думаю, як інтегрувати його в наступний урок."],
+  ["survivor","Не реагую. П’ятниця. Шостий урок. Я бачила й гірше."]
+ ]
+},
+{
+ day:"Субота",
+ question:"Оголосили кінець світу",
+ story:"Офіційне повідомлення: «Завтра о 12:00 кінець світу». Ваша перша думка?",
+ answers:[
+  ["zen","Добре, що не в понеділок."],
+  ["survivor","Значить, контрольні можна не перевіряти."],
+  ["plan","А звіт усе одно треба здати до 10:00?"],
+  ["digital","Пишу в чат: «Колеги, кінець світу очно чи дистанційно?»"]
+ ]
+},
+{
+ day:"Неділя",
+ question:"Усе скасували. Крім понеділка",
+ story:"Науковці повідомляють: «Кінця світу не буде. Марсіани полетіли. Цунамі висохло. Динозавра забрали». І тут приходить повідомлення: «Нагадуємо: завтра понеділок».",
+ answers:[
+  ["survivor","Оце вже погані новини."],
+  ["adventure","А марсіан точно не можна повернути?"],
+  ["plan","Відкриваю календарне планування. Життя триває."],
+  ["zen","Ставлю будильник. Українського вчителя так просто не налякаєш."]
+ ]
+}
+];
+
+const types = {
+ zen:{
+  title:'Учитель «Дзен 80-го рівня»',
+  image:'teacher-zen.jpg',
+  desc:'Ваш внутрішній спокій уже не залежить від зовнішніх обставин. Марсіани? Нехай сідають. Цунамі? Переходимо на другий поверх. Кінець світу? А він до чи після шостого уроку?',
+  motto:'Ваш девіз: «Добре. Працюємо далі».'
+ },
+ plan:{
+  title:'Учитель «План Б»',
+  image:'teacher-plan-b.jpg',
+  desc:'У вас немає форс-мажорів. Є лише незаплановані формати уроку. Якщо прилетять марсіани, через 15 хвилин вони вже працюватимуть у групах.',
+  motto:'Ваш девіз: «Зараз щось придумаємо».'
+ },
+ digital:{
+  title:'Учитель «Цифровий спецназ»',
+  image:'teacher-digital.jpg',
+  desc:'У вас відкриті Zoom, Classroom, ChatGPT, електронний журнал і ще 14 вкладок. Коли ШІ захопить школу, ви спочатку перевірите, чи він отримав посилання.',
+  motto:'Ваш девіз: «Зараз я вам скину посилання».'
+ },
+ survivor:{
+  title:'Учитель «Мене цим не налякаєш»',
+  image:'teacher-survivor.jpg',
+  desc:'Ви вже бачили дистанційку, відключення, реформи й термінові звіти «на вчора». Тому динозавр у коридорі викликає лише одне запитання: «Він до якого класу?»',
+  motto:'Ваш девіз: «І не таке переживали».'
+ },
+ adventure:{
+  title:'Учитель «Генератор пригод»',
+  image:'teacher-adventure.jpg',
+  desc:'Якщо життя дає вам проблему, ви робите з неї навчальний проєкт. Цунамі стає STEM-дослідженням, марсіани — міжпредметним тижнем, а динозавр — інтегрованим уроком.',
+  motto:'Ваш девіз: «А давайте спробуємо!»'
+ }
+};
+
+let current=0;
+let scores={zen:0,plan:0,digital:0,survivor:0,adventure:0};
+
+function startQuiz(){
+ document.getElementById('start').classList.add('hidden');
+ document.getElementById('quiz').classList.remove('hidden');
+ render();
+}
+function render(){
+ const q=questions[current];
+ document.getElementById('day').textContent=q.day;
+ document.getElementById('question').textContent=q.question;
+ document.getElementById('story').textContent=q.story;
+ document.getElementById('progressText').textContent=`День ${current+1} із ${questions.length}`;
+ document.getElementById('bar').style.width=`${((current)/questions.length)*100}%`;
+ const box=document.getElementById('answers');
+ box.innerHTML='';
+ q.answers.forEach((a,i)=>{
+   const b=document.createElement('button');
+   b.className='answer';
+   b.innerHTML=`<span class="letter">${String.fromCharCode(1040+i)}.</span>${a[1]}`;
+   b.onclick=()=>choose(a[0]);
+   box.appendChild(b);
+ });
+}
+function choose(type){
+ scores[type]++;
+ current++;
+ if(current<questions.length) render(); else showResult();
+}
+function showResult(){
+ document.getElementById('quiz').classList.add('hidden');
+ document.getElementById('result').classList.remove('hidden');
+ const order=['zen','plan','digital','survivor','adventure'];
+ const max=Math.max(...Object.values(scores));
+ const winner=order.find(k=>scores[k]===max);
+ const r=types[winner];
+ document.getElementById('resultTitle').textContent=r.title;
+ document.getElementById('resultImage').src=r.image;
+ document.getElementById('resultImage').alt=r.title;
+ document.getElementById('resultDesc').textContent=r.desc;
+ document.getElementById('resultMotto').textContent=r.motto;
+ window.scrollTo({top:0,behavior:'smooth'});
+}
+function restart(){
+ current=0;scores={zen:0,plan:0,digital:0,survivor:0,adventure:0};
+ document.getElementById('result').classList.add('hidden');
+ document.getElementById('start').classList.remove('hidden');
+ window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+</body>
+</html>
